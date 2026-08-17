@@ -1,6 +1,6 @@
-import { FenceMetadata } from './fence-metadata.ts';
+import { CodeBlockMetadata } from "./types.js";
 
-function parseInfoString(info: String): FenceMetadata {
+export function parseInfoString(info: String): CodeBlockMetadata {
 	
 	const trimmed = info.trim();
 
@@ -17,18 +17,12 @@ function parseInfoString(info: String): FenceMetadata {
 
 	const filenameMatch = attributes.match(/filename="([^"]+)"/);
 	const fileName = filenameMatch?.[1];
-	const whetherRun = fileName == "main.cpp" ? true : false;
 
 	return {
 		language,
-		filename: fileName,
-		run: whetherRun
+		filename: fileName
 	};
 }
-
-const test: FenceMetadata = parseInfoString('cpp {filename="math.cpp"}');
-
-console.log(test);
 
 
 

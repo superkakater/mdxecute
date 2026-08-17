@@ -4,7 +4,7 @@ Normal paragraph with **bold**
 
 ## Hello World
 
-```cpp {file="main.cpp" run}
+```cpp {filename="main.cpp"}
 #include <iostream>
 
 int main() {
