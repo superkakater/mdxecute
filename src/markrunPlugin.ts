@@ -1,4 +1,4 @@
-import { Token, type MarkdownIt } from "markdown-it";
+import type { MarkdownIt } from "markdown-it";
 import type { CppFile } from "./types.js";
 import { parseInfoString } from "./parseFunction.js";
 import type { MarkrunEnv } from "./types.js";
@@ -22,7 +22,7 @@ function getCppFile(token: FenceToken, index: number): CppFile | undefined {
 
     const metadata = parseInfoString(token.info);
 
-    if (metadata.language !== "cpp" || !metadata.filename) {
+    if (!["cpp", "c++", "cxx", "cc"].includes(metadata.language ?? "") || !metadata.filename) {
         return undefined;
     }
 
@@ -30,7 +30,7 @@ function getCppFile(token: FenceToken, index: number): CppFile | undefined {
         id: `cpp-block-${index}`,
         filename: metadata.filename,
         source: token.content,
-        isEntryPoint: metadata.filename === "main.cpp"
+        isEntryPoint: metadata.run === true || /(?:^|[\\/])main\.cpp$/.test(metadata.filename)
     };
 }
 
@@ -67,7 +67,7 @@ export function markrunPlugin(md: MarkdownIt): void {
         const originalCodeHtml = defaultFenceRenderer(tokens, index, options, env, self);
 
         const filename = md.utils.escapeHtml(cppFile.filename);
-        const runButton = cppFile.isEntryPoint ? '<button class="mark-run" type="button">Run Project</button>' : "";
+        const runButton = cppFile.isEntryPoint ? '<button class="markrun-run" type="button">Run Project</button>' : "";
 
         return `<section class="markrun-cell" data-cpp-id="${cppFile.id}">
                     <header class="markrun-cell-header">

@@ -1,6 +1,7 @@
 export interface CodeBlockMetadata {
 	language?: string;
 	filename?: string;
+	run?: boolean;
 }
 
 export interface CppFile {
@@ -16,15 +17,15 @@ export interface CppProject {
 }
 
 export interface CompileRunResult {
-	compileSucceded: boolean;
+	compileSucceeded: boolean;
 	stdout: string;
 	stderr: string;
 	exitCode: number | null;
-	timeout: boolean;
+	timedOut: boolean;
 	durationMs: number;
 }
 
-export interface MarkrunEnv {
+export interface MarkrunEnv extends Record<PropertyKey, unknown> {
 	markrun?: {
 		cppFiles: CppFile[];
 	}

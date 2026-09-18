@@ -8,7 +8,7 @@ Normal paragraph with **bold**
 #include <iostream>
 
 int main() {
-    std::count << "hello\n";
+    std::cout << "hello\n";
 }
 ```
 
@@ -19,3 +19,8 @@ int add(int a, int b) {
     return a + b;
 }
 ```
+
+## Testing
+- [x] first thing 
+- [x] second thing
+

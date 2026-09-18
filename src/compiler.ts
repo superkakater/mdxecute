@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
-import type { CompileRunResult, CppProject } from "./types.ts";
+import type { CompileRunResult, CppProject } from "./types.js";
 
 interface ProcessResult {
     stdout: string;
@@ -15,14 +15,15 @@ interface ProcessResult {
 function execute(executable: string, args: string[], cwd: string, timeoutMs: number): Promise<ProcessResult> {
 
     return new Promise((resolve) => {
-        execFile(
+        const child = execFile(
             executable,
             args,
             {
                 cwd,
                 timeout: timeoutMs,
                 maxBuffer: 1024 * 1024,
-                windowsHide: true
+                windowsHide: true,
+                killSignal: "SIGKILL"
             },
             (error, stdout, stderr) => {
                 if (!error) {
@@ -30,7 +31,7 @@ function execute(executable: string, args: string[], cwd: string, timeoutMs: num
                     return;
                 }
 
-                const errorWithCode = error as NodeJS.ErrnoException & {
+                const errorWithCode = error as Omit<NodeJS.ErrnoException, "code"> & {
                     code?: string | number;
                     killed?: boolean;
                     signal?: NodeJS.Signals;
@@ -41,15 +42,16 @@ function execute(executable: string, args: string[], cwd: string, timeoutMs: num
                     return;
                 }
 
-                resolve({stdout, stderr, exitCode: typeof errorWithCode.code === "number" ? errorWithCode.code : null, timeOut: Boolean(errorWithCode.killed)})
+                resolve({stdout, stderr: stderr || error.message, exitCode: typeof errorWithCode.code === "number" ? errorWithCode.code : null, timeOut: Boolean(errorWithCode.killed) && errorWithCode.code !== "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"})
             }
         );
+        child.stdin?.end();
     })
 }
 
-async function writeProject(proejct: CppProject, directory: string): Promise<void> {
+async function writeProject(project: CppProject, directory: string): Promise<void> {
 
-    for (const file of proejct.files) {
+    for (const file of project.files) {
         const target = path.join(directory, file.filename);
         await mkdir(path.dirname(target), {recursive: true});
         await writeFile(target, file.source, "utf8");
@@ -61,7 +63,7 @@ export async function compileAndRun(project: CppProject): Promise<CompileRunResu
     const startedAt = performance.now();
 
     if (!project.entryPoint) {
-        return {compileSucceded: false, stdout: "", stderr: "No main.cpp block exists in this markdown file.", exitCode: null, timeout: false, durationMs: 0}
+        return {compileSucceeded: false, stdout: "", stderr: "No entry point found. Name a block main.cpp or add the run flag.", exitCode: null, timedOut: false, durationMs: 0}
     }
 
     const directory = await mkdtemp(path.join(tmpdir(), "markrun-"));
@@ -70,13 +72,14 @@ export async function compileAndRun(project: CppProject): Promise<CompileRunResu
         await writeProject(project, directory);
         const cppSources = project.files
             .map((file) => file.filename)
-            .filter((filename) => filename.endsWith(".cpp"));
+            .filter((filename) => /\.(?:cpp|cc|cxx)$/i.test(filename))
+            .map((filename) => `./${filename}`);
 
         if (cppSources.length === 0) {
-            throw new Error("No .cpp files were found");
+            throw new Error("No C++ source files were found");
         }
 
-        const outputName = process.platform === "win32" ? "markrun.exe" : "markrun.out";
+        const outputName = process.platform === "win32" ? ".markrun-program.exe" : ".markrun-program";
 
         const compileResult = await execute(
             "g++",
@@ -87,11 +90,11 @@ export async function compileAndRun(project: CppProject): Promise<CompileRunResu
 
         if (compileResult.exitCode !== 0) {
             return {
-                compileSucceded: false,
+                compileSucceeded: false,
                 stdout: compileResult.stdout,
                 stderr: compileResult.stderr,
                 exitCode: compileResult.exitCode,
-                timeout: compileResult.timeOut,
+                timedOut: compileResult.timeOut,
                 durationMs: Math.round(performance.now() - startedAt)
             };
         };
@@ -100,11 +103,11 @@ export async function compileAndRun(project: CppProject): Promise<CompileRunResu
         const runResult = await execute(executable, [], directory, 3_000);
 
         return {
-            compileSucceded: true,
+            compileSucceeded: true,
             stdout: runResult.stdout,
             stderr: runResult.stderr,
             exitCode: runResult.exitCode,
-            timeout: runResult.timeOut,
+            timedOut: runResult.timeOut,
             durationMs: Math.round(performance.now() - startedAt)
         };
     } finally {

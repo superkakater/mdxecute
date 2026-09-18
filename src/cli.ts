@@ -23,4 +23,7 @@ async function main(): Promise<void> {
     await startServer(markdownPath);
 }
 
-void main();
+void main().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+});

@@ -1,31 +1,14 @@
-import { CodeBlockMetadata } from "./types.js";
+import type { CodeBlockMetadata } from "./types.js";
 
-export function parseInfoString(info: String): CodeBlockMetadata {
-	
-	const trimmed = info.trim();
+export function parseInfoString(info: string): CodeBlockMetadata {
+    const match = info.trim().match(/^(\S+?)(?=\s|\{|$)([\s\S]*)$/);
+    const attributes = match?.[2] ?? "";
+    const filenameMatch = attributes.match(/\bfilename\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s}]+))/);
+    const flags = attributes.replace(/\bfilename\s*=\s*(?:"[^"]*"|'[^']*'|[^\s}]+)/g, " ");
 
-	const firstSpace = trimmed.indexOf(" ");
-
-	if (firstSpace == -1) {
-		return {
-			language: trimmed
-		};
-	}
-
-	const language = trimmed.slice(0, firstSpace);
-	const attributes = trimmed.slice(firstSpace + 1);
-
-	const filenameMatch = attributes.match(/filename="([^"]+)"/);
-	const fileName = filenameMatch?.[1];
-
-	return {
-		language,
-		filename: fileName
-	};
+    return {
+        language: match?.[1].toLowerCase(),
+        filename: filenameMatch?.[1] ?? filenameMatch?.[2] ?? filenameMatch?.[3],
+        run: /(?:^|[\s{])run(?=$|[\s}])/.test(flags)
+    };
 }
-
-
-
-
-
-
