@@ -25,10 +25,9 @@ export interface CompileRunResult {
 	durationMs: number;
 }
 
-export interface MarkrunEnv extends Record<PropertyKey, unknown> {
-	markrun?: {
+export interface MdxecuteEnv extends Record<PropertyKey, unknown> {
+	mdxecute?: {
 		cppFiles: CppFile[];
 	}
 }
-
 

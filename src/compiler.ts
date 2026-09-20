@@ -66,7 +66,7 @@ export async function compileAndRun(project: CppProject): Promise<CompileRunResu
         return {compileSucceeded: false, stdout: "", stderr: "No entry point found. Name a block main.cpp or add the run flag.", exitCode: null, timedOut: false, durationMs: 0}
     }
 
-    const directory = await mkdtemp(path.join(tmpdir(), "markrun-"));
+    const directory = await mkdtemp(path.join(tmpdir(), "mdxecute-"));
 
     try {
         await writeProject(project, directory);
@@ -79,7 +79,7 @@ export async function compileAndRun(project: CppProject): Promise<CompileRunResu
             throw new Error("No C++ source files were found");
         }
 
-        const outputName = process.platform === "win32" ? ".markrun-program.exe" : ".markrun-program";
+        const outputName = process.platform === "win32" ? ".mdxecute-program.exe" : ".mdxecute-program";
 
         const compileResult = await execute(
             "g++",

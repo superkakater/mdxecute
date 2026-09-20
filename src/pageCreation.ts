@@ -10,7 +10,7 @@ export function createPage(title: string, markdownHtml: string, version = ""): s
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${safeTitle} - MarkRun</title>
+  <title>${safeTitle} - MDXecute</title>
   <style>
     :root { color-scheme: light dark; }
     body {
@@ -27,17 +27,17 @@ export function createPage(title: string, markdownHtml: string, version = ""): s
       background: color-mix(in srgb, CanvasText 8%, Canvas);
     }
     code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .markrun-cell {
+    .mdxecute-cell {
       border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
       border-radius: 10px;
       overflow: hidden;
       margin: 20px 0;
     }
-    .markrun-cell > pre {
+    .mdxecute-cell > pre {
       margin: 0;
       border-radius: 0;
     }
-    .markrun-cell-header {
+    .mdxecute-cell-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -46,11 +46,11 @@ export function createPage(title: string, markdownHtml: string, version = ""): s
       border-bottom: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
       background: color-mix(in srgb, CanvasText 5%, Canvas);
     }
-    .markrun-run {
+    .mdxecute-run {
       cursor: pointer;
       padding: 5px 12px;
     }
-    .markrun-output {
+    .mdxecute-output {
       margin: 0;
       border-radius: 0;
       border-top: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
@@ -66,17 +66,17 @@ export function createPage(title: string, markdownHtml: string, version = ""): s
     mark { background: #ffe58a; color: #222; padding: 0 2px; }
     dt { font-weight: bold; }
     .footnotes { font-size: 0.9em; }
-    #markrun-status { font-size: 0.85em; opacity: 0.75; }
+    #mdxecute-status { font-size: 0.85em; opacity: 0.75; }
   </style>
 </head>
 <body>
-  <div id="markrun-status" role="status">Live preview · updates on save</div>
-  <main id="markrun-document">${markdownHtml}</main>
+  <div id="mdxecute-status" role="status">Live preview · updates on save</div>
+  <main id="mdxecute-document">${markdownHtml}</main>
   <script>
     let version = ${JSON.stringify(version).replace('<', '\u003c')};
     let activeRuns = 0;
-    const preview = document.getElementById("markrun-document");
-    const status = document.getElementById("markrun-status");
+    const preview = document.getElementById("mdxecute-document");
+    const status = document.getElementById("mdxecute-status");
 
     async function refreshPreview() {
       try {
@@ -102,12 +102,12 @@ export function createPage(title: string, markdownHtml: string, version = ""): s
 
     document.addEventListener("click", async (event) => {
       const target = event.target;
-      if (!(target instanceof HTMLButtonElement) || !target.classList.contains("markrun-run")) {
+      if (!(target instanceof HTMLButtonElement) || !target.classList.contains("mdxecute-run")) {
         return;
       }
 
-      const cell = target.closest(".markrun-cell");
-      const output = cell?.querySelector(".markrun-output");
+      const cell = target.closest(".mdxecute-cell");
+      const output = cell?.querySelector(".mdxecute-output");
       if (!(output instanceof HTMLElement)) {
         return;
       }
@@ -118,11 +118,11 @@ export function createPage(title: string, markdownHtml: string, version = ""): s
       output.textContent = "Compiling...";
 
       try {
-        const response = await fetch("/api/run", { method: "POST", headers: { "X-Markrun-Request": "run", "X-Markrun-Version": version } });
+        const response = await fetch("/api/run", { method: "POST", headers: { "X-MDXecute-Request": "run", "X-MDXecute-Version": version } });
         const result = await response.json();
 
         if (!response.ok) {
-          output.textContent = result.error ?? "MarkRun failed.";
+          output.textContent = result.error ?? "MDXecute failed.";
           return;
         }
 

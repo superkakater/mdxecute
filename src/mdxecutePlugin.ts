@@ -1,9 +1,9 @@
 import type { MarkdownIt } from "markdown-it";
 import type { CppFile } from "./types.js";
 import { parseInfoString } from "./parseFunction.js";
-import type { MarkrunEnv } from "./types.js";
+import type { MdxecuteEnv } from "./types.js";
 
-interface MarkrunTokenMeta extends Record<string, unknown> {
+interface MdxecuteTokenMeta extends Record<string, unknown> {
     cppFile?: CppFile;
 }
 
@@ -34,11 +34,11 @@ function getCppFile(token: FenceToken, index: number): CppFile | undefined {
     };
 }
 
-export function markrunPlugin(md: MarkdownIt): void {
+export function mdxecutePlugin(md: MarkdownIt): void {
 
-    md.core.ruler.after("block", "markrun_collect_cpp", (state) => {
-        const env = state.env as MarkrunEnv;
-        env.markrun = { cppFiles: [] };
+    md.core.ruler.after("block", "mdxecute_collect_cpp", (state) => {
+        const env = state.env as MdxecuteEnv;
+        env.mdxecute = { cppFiles: [] };
 
         state.tokens.forEach((token, index) => {
             const cppFile = getCppFile(token as FenceToken, index);
@@ -46,10 +46,10 @@ export function markrunPlugin(md: MarkdownIt): void {
                 return;
             }
 
-            const meta = (token.meta ?? {}) as MarkrunTokenMeta;
+            const meta = (token.meta ?? {}) as MdxecuteTokenMeta;
             meta.cppFile = cppFile;
             token.meta = meta;
-            env.markrun!.cppFiles.push(cppFile)
+            env.mdxecute!.cppFiles.push(cppFile)
         });
     });
 
@@ -57,7 +57,7 @@ export function markrunPlugin(md: MarkdownIt): void {
 
     md.renderer.rules.fence = (tokens, index, options, env, self) => {
         const token = tokens[index];
-        const meta = token.meta as MarkrunTokenMeta;
+        const meta = token.meta as MdxecuteTokenMeta;
         const cppFile = meta?.cppFile;
 
         if (!cppFile || !defaultFenceRenderer) {
@@ -67,15 +67,15 @@ export function markrunPlugin(md: MarkdownIt): void {
         const originalCodeHtml = defaultFenceRenderer(tokens, index, options, env, self);
 
         const filename = md.utils.escapeHtml(cppFile.filename);
-        const runButton = cppFile.isEntryPoint ? '<button class="markrun-run" type="button">Run Project</button>' : "";
+        const runButton = cppFile.isEntryPoint ? '<button class="mdxecute-run" type="button">Run Project</button>' : "";
 
-        return `<section class="markrun-cell" data-cpp-id="${cppFile.id}">
-                    <header class="markrun-cell-header">
+        return `<section class="mdxecute-cell" data-cpp-id="${cppFile.id}">
+                    <header class="mdxecute-cell-header">
                         <code>${filename}</code>
                         ${runButton}
                     </header>
                     ${originalCodeHtml}
-                    ${cppFile.isEntryPoint ? '<pre class="markrun-output" hidden></pre>' : ""}
+                    ${cppFile.isEntryPoint ? '<pre class="mdxecute-output" hidden></pre>' : ""}
                 </section>`;
     };
 }

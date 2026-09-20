@@ -7,7 +7,7 @@ async function main(): Promise<void> {
     const markdownPath = process.argv[2];
 
     if (!markdownPath) {
-        console.error("Usage: markrun <file.md>");
+        console.error("Usage: mdxecute <file.md>");
         process.exitCode = 1;
         return;
     }

@@ -1,9 +1,9 @@
 {
-    "name": "markrun",
+    "name": "mdxecute",
     "version": "0.1.0",
     "type": "module",
     "bin": {
-        "markrun": "./dist/cli.js"
+        "mdxecute": "./dist/cli.js"
     },
     "scripts": {
         "build": "tsc -p tsconfig.json",

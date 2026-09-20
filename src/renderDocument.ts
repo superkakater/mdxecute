@@ -6,8 +6,8 @@ import sub from "markdown-it-sub";
 import sup from "markdown-it-sup";
 import deflist from "markdown-it-deflist";
 import { buildCppProject } from "./projectBuilder.js";
-import type { CppProject, MarkrunEnv } from "./types.js";
-import { markrunPlugin } from "./markrunPlugin.js";
+import type { CppProject, MdxecuteEnv } from "./types.js";
+import { mdxecutePlugin } from "./mdxecutePlugin.js";
 
 export interface RenderedDocument {
     html: string;
@@ -28,11 +28,11 @@ export function renderDocument(source: string): RenderedDocument {
     md.use(sub);
     md.use(sup);
     md.use(deflist);
-    md.use(markrunPlugin);
+    md.use(mdxecutePlugin);
 
-    const env: MarkrunEnv = {};
+    const env: MdxecuteEnv = {};
     const html = md.render(source, env);
-    const project = buildCppProject(env.markrun?.cppFiles ?? []);
+    const project = buildCppProject(env.mdxecute?.cppFiles ?? []);
 
     return {html, project};
 }

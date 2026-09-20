@@ -1,4 +1,4 @@
-# MarkRun
+# MDXecute
 
 This software helps with preview in markdown, and it can compile and run a c++ project directly from the browser
 
@@ -17,7 +17,7 @@ To install the local command:
 
 ```sh
 npm link
-markrun /path/to/notes.md
+mdxecute /path/to/notes.md
 ```
 
 ## Live preview

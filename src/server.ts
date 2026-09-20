@@ -64,9 +64,9 @@ export async function startServer(markdownPath: string, port = 4280): Promise<Se
             }
 
             if (request.method === "POST" && url.pathname === "/api/run") {
-                if (request.headers["x-markrun-request"] !== "run" ||
+                if (request.headers["x-mdxecute-request"] !== "run" ||
                     (request.headers.origin && !allowedHosts.some((host) => request.headers.origin === `http://${host}`))) {
-                    sendJson(response, 403, JSON.stringify({ error: "Run requests must come from the MarkRun preview." }));
+                    sendJson(response, 403, JSON.stringify({ error: "Run requests must come from the MDXecute preview." }));
                     return;
                 }
                 if (running) {
@@ -76,7 +76,7 @@ export async function startServer(markdownPath: string, port = 4280): Promise<Se
                 running = true;
                 try {
                     const rendered = await loadMarkdown(absoluteMarkdownPath);
-                    if (request.headers["x-markrun-version"] !== rendered.version) {
+                    if (request.headers["x-mdxecute-version"] !== rendered.version) {
                         sendJson(response, 409, JSON.stringify({ error: "The Markdown changed. Wait for the preview to update and run again." }));
                         return;
                     }
@@ -116,7 +116,7 @@ export async function startServer(markdownPath: string, port = 4280): Promise<Se
         });
     });
     const address = server.address();
-    console.log(`MarkRun preview: http://localhost:${typeof address === "object" && address ? address.port : port}`);
+    console.log(`MDXecute preview: http://localhost:${typeof address === "object" && address ? address.port : port}`);
     console.log(`Markdown: ${absoluteMarkdownPath}`);
     console.log("Live preview updates on save. Press Ctrl+C to stop.");
     return server;
