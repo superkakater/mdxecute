@@ -45,6 +45,8 @@ Usage:
     process.exitCode = 1;
     return;
   }
+
+  await startServer(argument);
 }
 
 void main().catch((error) => {
