@@ -1,29 +1,53 @@
 #!/usr/bin/env node
+
+import { readFileSync } from "node:fs";
 import { access } from "node:fs/promises";
 import { startServer } from "./server.js";
 
+interface PackageMetadata {
+  version: string;
+}
+
+const packageMetadata = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8")
+) as PackageMetadata
+
 async function main(): Promise<void> {
 
-    const markdownPath = process.argv[2];
+  const argument = process.argv[2];
 
-    if (!markdownPath) {
-        console.error("Usage: mdxecute <file.md>");
-        process.exitCode = 1;
-        return;
-    }
+  if (argument == "--version" || argument == "-v") {
+    console.log(`mdxecute ${packageMetadata.version}`);
+    return;
+  }
 
-    try {
-        await access(markdownPath);
-    } catch {
-        console.error(`Markdown file does not exist: ${markdownPath}`);
-        process.exitCode = 1;
-        return;
-    }
 
-    await startServer(markdownPath);
+  if (argument === "--help" || argument === "-h") {
+    console.log(`MDXecute ${packageMetadata.version}
+
+Usage:
+  mdxecute <file.md>
+  mdxecute --version
+  mdxecute --help`);
+    return;
+  }
+
+  if (!argument) {
+    console.error("Usage: mdxecute <file.md>");
+    process.exitCode = 1;
+    return;
+  }
+
+  try {
+    await access(argument);
+  } catch {
+    console.error(`Markdown file does not exist: ${argument}`);
+    process.exitCode = 1;
+    return;
+  }
 }
 
 void main().catch((error) => {
-    console.error(error instanceof Error ? error.message : String(error));
-    process.exitCode = 1;
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
 });
